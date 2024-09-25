@@ -17,6 +17,8 @@ const (
 )
 
 // Task defines one task
+// A task is the smallest unit of work in this orchestration system and runs on a container.
+// Think - process on a machine
 type Task struct {
 	ID            uuid.UUID         // UUID for each task to uniquely identify them
 	Name          string            // Human-readable name
