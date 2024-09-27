@@ -1,6 +1,7 @@
 package task
 
 import (
+	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/google/uuid"
 	"time"
@@ -39,4 +40,34 @@ type TaskEvent struct {
 	State     State
 	Timestamp time.Time
 	Task      Task
+}
+
+// Config struct is used to hold the docker container configuration
+type Config struct {
+	Name          string // name field used to identify the task
+	AttachStdin   bool   // if the stdin should be attached
+	AttachStdout  bool   // if the stdout should be attached
+	AttachStderr  bool   // if the stderr should be attached
+	ExposedPorts  nat.PortSet
+	Cmd           []string // command within a container
+	Image         string   // name of the image that the container runs
+	Cpu           float64
+	Memory        int64
+	Disk          int64
+	Env           []string // environment variables
+	RestartPolicy string   // always / unless-stopped / on-failure
+}
+
+// Docker struct is used to run a task as a Docker container
+type Docker struct {
+	Client *client.Client
+	Config Config
+}
+
+// DockerResult contains the result of the docker container execution
+type DockerResult struct {
+	Error       error  // Error is used to hold error messages
+	Action      string // Action being taken, start, stop, etc
+	ContainerId string // ContainerId has the current ID of the container being run
+	Result      string // Result holds text to provide more information on the output
 }
