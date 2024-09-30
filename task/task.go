@@ -1,9 +1,14 @@
 package task
 
 import (
+	"context"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/google/uuid"
+	"io"
+	"log"
+	"os"
 	"time"
 )
 
@@ -60,8 +65,8 @@ type Config struct {
 
 // Docker struct is used to run a task as a Docker container
 type Docker struct {
-	Client *client.Client
-	Config Config
+	Client *client.Client // Client holds the Docker client used to interact with Docker API
+	Config Config         // Config holds the configuration of the docker container
 }
 
 // DockerResult contains the result of the docker container execution
@@ -70,4 +75,21 @@ type DockerResult struct {
 	Action      string // Action being taken, start, stop, etc
 	ContainerId string // ContainerId has the current ID of the container being run
 	Result      string // Result holds text to provide more information on the output
+}
+
+// Run method actually runs the container
+// 1. pull the Docker image from the container repository
+// 2. ImagePull to pull the image
+// 3. Check if ImagePull was successful
+// 4. Return to standard output
+func (d *Docker) Run() DockerResult {
+	ctx := context.Background()
+	reader, err := d.Client.ImagePull(ctx, d.Config.Image, image.PullOptions{})
+	if err != nil {
+		log.Printf("Error pulling image %s: %v\n", d.Config.Image, err)
+		return DockerResult{Error: err}
+	}
+	_, err = io.Copy(os.Stdout, reader)
+
+	return DockerResult{}
 }
